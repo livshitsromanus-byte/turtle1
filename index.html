@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Черепашка Skulpt</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Черепашка Skulpt — Demo</title>
+
+<!-- Skulpt (CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
+
 <style>
-  textarea { width: 600px; height: 150px; }
-  #mycanvas { border: 1px solid #000; }
+  body { font-family: Arial, sans-serif; padding: 16px; }
+  textarea { width: 100%; max-width: 800px; height: 160px; font-family: monospace; }
+  #mycanvas { border: 1px solid #333; display:block; margin-top:12px; }
+  .controls { margin-top:8px; }
+  #output { white-space: pre-wrap; margin-top:8px; color:#b00; }
 </style>
 </head>
 <body>
-<h2>Черепашка на Skulpt</h2>
+  <h2>Черепашка на Skulpt (Python)</h2>
 
-<textarea id="code">
+  <textarea id="code">
 import turtle
 
 turtle.forward(100)
@@ -24,39 +31,88 @@ turtle.left(90)
 turtle.forward(100)
 turtle.left(90)
 turtle.forward(100)
-</textarea>
-<br>
-<button onclick="runCode()">Запустить</button>
-<br><br>
-<canvas id="mycanvas" width="600" height="400"></canvas>
+  </textarea>
+
+  <div class="controls">
+    <button id="runBtn">Запустить</button>
+    <button id="clearBtn">Очистить</button>
+  </div>
+
+  <canvas id="mycanvas" width="800" height="480"></canvas>
+
+  <div id="output" aria-live="polite"></div>
 
 <script>
-function runCode() {
-    let prog = document.getElementById("code").value;
+(function(){
+  const codeEl = document.getElementById('code');
+  const outEl = document.getElementById('output');
+  const canvas = document.getElementById('mycanvas');
+
+  function outf(text) {
+    // вывод ошибок/print
+    outEl.textContent += text;
+  }
+
+  function builtinRead(x) {
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
+      throw "File not found: '" + x + "'";
+    }
+    return Sk.builtinFiles["files"][x];
+  }
+
+  function resetOutput() {
+    outEl.textContent = "";
+  }
+
+  function clearCanvas() {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function runCode() {
+    resetOutput();
+    clearCanvas();
+
+    const prog = codeEl.value;
 
     Sk.configure({
-        output: function(text) { console.log(text); },
-        read: function(x) {
-            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-                throw "File not found: '" + x + "'";
-            return Sk.builtinFiles["files"][x];
-        },
-        __future__: Sk.python3,
-        canvas: document.getElementById("mycanvas")
+      output: outf,
+      read: builtinRead,
+      // enable python3 mode
+      python3: true
     });
 
-    // Очистка холста
-    let canvas = document.getElementById("mycanvas");
-    let ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Создаём область черепашки для канваса:
+    // Перед importMainWithBody нужно инициализировать TurtleGraphics:
+    try {
+      // метод: Sk.TurtleGraphics('id_canvas')
+      Sk.TurtleGraphics(canvas.id);
+    } catch (e) {
+      // если уже инициализировано — игнорируем
+      console.warn(e && e.toString ? e.toString() : e);
+    }
 
-    Sk.TurtleGraphics(target="mycanvas");
+    // Запуск кода (асинхронно внутри Skulpt)
     Sk.misceval.asyncToPromise(function() {
-        return Sk.importMainWithBody("<stdin>", false, prog);
-    }).catch(function(err) {
-        console.error(err.toString());
+      return Sk.importMainWithBody("<stdin>", false, prog, true);
+    }).then(function(mod) {
+      // выполнено успешно
+    }, function(err) {
+      // Показать ошибку пользователю
+      outf("\n" + err.toString());
+      console.error(err);
     });
-}
+  }
+
+  document.getElementById('runBtn').addEventListener('click', runCode);
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    resetOutput();
+    clearCanvas();
+  });
+
+  // опционально: запустить при загрузке
+  // runCode();
+})();
 </script>
 </body>
 </html>
