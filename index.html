@@ -2,42 +2,59 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>Черепашка Brython</title>
     <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.min.js"></script>
+    <style>
+        #turtle_area {
+            border: 1px solid black;
+            width: 600px;
+            height: 400px;
+        }
+        textarea {
+            width: 600px;
+            height: 150px;
+        }
+    </style>
 </head>
 <body onload="brython()">
 
-<h2>Черепашка на Brython</h2>
+<h2>Черепашка Brython — пример с полем для кода</h2>
 
-<button onclick="run_code()">Запустить пример</button>
+<textarea id="code">
+import turtle
+
+t = turtle.Turtle()
+t.speed(3)
+
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+</textarea>
+<br>
+<button onclick="run_code()">Запустить</button>
 
 <div id="turtle_area"></div>
 
 <script type="text/javascript">
 function run_code() {
-    document.getElementById("turtle_area").innerHTML = `
-        <canvas id="mycanvas" width="600" height="400" style="border:1px solid black"></canvas>
-    `;
+    // Очищаем холст и создаем новый
+    document.getElementById("turtle_area").innerHTML = '<canvas id="mycanvas" width="600" height="400"></canvas>';
 
+    // Берем код из textarea
+    let code = document.getElementById("code").value;
+
+    // Добавляем настройки холста для Brython turtle
     let py = `
 from browser import document
 import turtle
 
 canvas = document["mycanvas"]
-
-# Настройка холста
 turtle.set_defaults(canvwidth=600, canvheight=400, turtle_canvas=canvas)
 
-# Создаем черепашку
-t = turtle.Turtle()
-t.speed(3)
+` + code;
 
-# Рисуем квадрат
-for i in range(4):
-    t.forward(100)
-    t.left(90)
-`;
-
+    // Запускаем Python код
     __BRYTHON__.run_py(py);
 }
 </script>
