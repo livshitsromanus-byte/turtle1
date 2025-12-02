@@ -9,19 +9,7 @@
 
 <h2>Черепашка на Brython</h2>
 
-<textarea id="code" style="width:600px; height:200px;">
-import turtle
-
-t = turtle.Turtle()
-t.speed(3)
-
-for i in range(4):
-    t.forward(100)
-    t.left(90)
-</textarea>
-
-<br><br>
-<button onclick="run_code()">Запустить</button>
+<button onclick="run_code()">Запустить пример</button>
 
 <div id="turtle_area"></div>
 
@@ -31,16 +19,24 @@ function run_code() {
         <canvas id="mycanvas" width="600" height="400" style="border:1px solid black"></canvas>
     `;
 
-    let code = document.getElementById("code").value;
-
     let py = `
 from browser import document
 import turtle
 
 canvas = document["mycanvas"]
+
+# Настройка холста
 turtle.set_defaults(canvwidth=600, canvheight=400, turtle_canvas=canvas)
 
-` + code;
+# Создаем черепашку
+t = turtle.Turtle()
+t.speed(3)
+
+# Рисуем квадрат
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+`;
 
     __BRYTHON__.run_py(py);
 }
