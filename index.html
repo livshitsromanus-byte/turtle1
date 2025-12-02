@@ -2,16 +2,18 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Черепашка в браузере</title>
+<title>Черепашка Skulpt</title>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
 <style>
-  #output { border: 1px solid #ccc; width: 600px; height: 400px; }
   textarea { width: 600px; height: 150px; }
+  #mycanvas { border: 1px solid #000; }
 </style>
 </head>
 <body>
 <h2>Черепашка на Skulpt</h2>
+
 <textarea id="code">
 import turtle
 
@@ -26,33 +28,29 @@ turtle.forward(100)
 <br>
 <button onclick="runCode()">Запустить</button>
 <br><br>
-<canvas id="output" width="600" height="400"></canvas>
+<canvas id="mycanvas" width="600" height="400"></canvas>
 
 <script>
-function outf(text) {
-    console.log(text);
-}
-
-// Настройка Skulpt для работы с turtle
 function runCode() {
     let prog = document.getElementById("code").value;
 
     Sk.configure({
-        output: outf,
+        output: function(text) { console.log(text); },
         read: function(x) {
             if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
                 throw "File not found: '" + x + "'";
             return Sk.builtinFiles["files"][x];
         },
-        turtle: true,
-        canvas: document.getElementById("output")
+        __future__: Sk.python3,
+        canvas: document.getElementById("mycanvas")
     });
 
     // Очистка холста
-    let canvas = document.getElementById("output");
+    let canvas = document.getElementById("mycanvas");
     let ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    Sk.TurtleGraphics(target="mycanvas");
     Sk.misceval.asyncToPromise(function() {
         return Sk.importMainWithBody("<stdin>", false, prog);
     }).catch(function(err) {
