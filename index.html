@@ -1,63 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Черепашка Brython</title>
-    <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.min.js"></script>
-    <style>
-        #turtle_area {
-            border: 1px solid black;
-            width: 600px;
-            height: 400px;
-        }
-        textarea {
-            width: 600px;
-            height: 150px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Черепашка в браузере</title>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<style>
+  #output { border: 1px solid #ccc; width: 600px; height: 400px; }
+  textarea { width: 600px; height: 150px; }
+</style>
 </head>
-<body onload="brython()">
-
-<h2>Черепашка Brython — пример с полем для кода</h2>
-
+<body>
+<h2>Черепашка на Skulpt</h2>
 <textarea id="code">
 import turtle
 
-t = turtle.Turtle()
-t.speed(3)
-
-for i in range(4):
-    t.forward(100)
-    t.left(90)
+turtle.forward(100)
+turtle.left(90)
+turtle.forward(100)
+turtle.left(90)
+turtle.forward(100)
+turtle.left(90)
+turtle.forward(100)
 </textarea>
 <br>
-<button onclick="run_code()">Запустить</button>
+<button onclick="runCode()">Запустить</button>
+<br><br>
+<canvas id="output" width="600" height="400"></canvas>
 
-<div id="turtle_area"></div>
+<script>
+function outf(text) {
+    console.log(text);
+}
 
-<script type="text/javascript">
-function run_code() {
-    // Очищаем холст и создаем новый
-    document.getElementById("turtle_area").innerHTML = '<canvas id="mycanvas" width="600" height="400"></canvas>';
+// Настройка Skulpt для работы с turtle
+function runCode() {
+    let prog = document.getElementById("code").value;
 
-    // Берем код из textarea
-    let code = document.getElementById("code").value;
+    Sk.configure({
+        output: outf,
+        read: function(x) {
+            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                throw "File not found: '" + x + "'";
+            return Sk.builtinFiles["files"][x];
+        },
+        turtle: true,
+        canvas: document.getElementById("output")
+    });
 
-    // Добавляем настройки холста для Brython turtle
-    let py = `
-from browser import document
-import turtle
+    // Очистка холста
+    let canvas = document.getElementById("output");
+    let ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-canvas = document["mycanvas"]
-turtle.set_defaults(canvwidth=600, canvheight=400, turtle_canvas=canvas)
-
-` + code;
-
-    // Запускаем Python код
-    __BRYTHON__.run_py(py);
+    Sk.misceval.asyncToPromise(function() {
+        return Sk.importMainWithBody("<stdin>", false, prog);
+    }).catch(function(err) {
+        console.error(err.toString());
+    });
 }
 </script>
-
 </body>
 </html>
