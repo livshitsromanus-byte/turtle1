@@ -2,23 +2,22 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Черепашка Skulpt</title>
+<title>Skulpt Turtle</title>
 
-<!-- Skulpt -->
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
 
 <style>
-  body { font-family: Arial, sans-serif; padding: 16px; }
-  textarea { width: 100%; max-width: 700px; height: 150px; font-family: monospace; }
-  #mycanvas { border: 1px solid #000; margin-top: 15px; }
-  #output { margin-top: 10px; white-space: pre-wrap; color: #b00; }
+body { font-family: sans-serif; padding: 20px; }
+textarea { width: 600px; height: 150px; }
+#mycanvas { border: 1px solid black; margin-top: 10px; }
+#output { white-space: pre-wrap; color: #b00; margin-top: 10px; }
 </style>
 </head>
 <body>
 
-<h2>Skulpt Python Turtle</h2>
+<h2>Python Turtle (Skulpt)</h2>
 
 <textarea id="code">
 import turtle
@@ -28,13 +27,10 @@ for i in range(4):
     turtle.forward(100)
     turtle.left(90)
 </textarea>
-
 <br>
 <button onclick="runCode()">Запустить</button>
-<button onclick="clearCanvas()">Очистить холст</button>
 
 <canvas id="mycanvas" width="600" height="400"></canvas>
-
 <div id="output"></div>
 
 <script>
@@ -43,22 +39,18 @@ function outf(text) {
 }
 
 function builtinRead(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+    if (!Sk.builtinFiles || !Sk.builtinFiles["files"][x])
         throw "File not found: '" + x + "'";
     return Sk.builtinFiles["files"][x];
 }
 
-function clearCanvas() {
+function runCode() {
     const canvas = document.getElementById("mycanvas");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     document.getElementById("output").textContent = "";
-}
 
-function runCode() {
-    clearCanvas();
-
-    const prog = document.getElementById("code").value;
+    const code = document.getElementById("code").value;
 
     Sk.configure({
         output: outf,
@@ -66,14 +58,13 @@ function runCode() {
         python3: true
     });
 
-    // ВАЖНО! Правильный вызов без target=
-    Sk.TurtleGraphics("mycanvas");
+    // ✔ Правильная инициализация в Skulpt 1.2.0
+    Sk.TurtleGraphics.setup(canvas);
 
     Sk.misceval.asyncToPromise(() => {
-        return Sk.importMainWithBody("<stdin>", false, prog, true);
+        return Sk.importMainWithBody("<stdin>", false, code, true);
     }).catch(err => {
-        document.getElementById("output").textContent += "\n" + err.toString();
-        console.error(err);
+        outf("\n" + err.toString());
     });
 }
 </script>
