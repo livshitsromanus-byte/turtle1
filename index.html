@@ -2,13 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Черепашка на Brython</title>
     <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.min.js"></script>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #turtle_area { margin-top: 20px; }
-    </style>
 </head>
 <body onload="brython()">
 
@@ -26,7 +21,6 @@ for i in range(4):
 </textarea>
 
 <br><br>
-
 <button onclick="run_code()">Запустить</button>
 
 <div id="turtle_area"></div>
@@ -36,7 +30,7 @@ function run_code() {
     document.getElementById("turtle_area").innerHTML = `
         <canvas id="mycanvas" width="600" height="400" style="border:1px solid black"></canvas>
     `;
-    
+
     let code = document.getElementById("code").value;
 
     let py = `
@@ -44,9 +38,9 @@ from browser import document
 import turtle
 
 canvas = document["mycanvas"]
-turtle.TurtleScreen(canvas)
-t = turtle.RawTurtle(canvas)
-` + "\n" + code;
+turtle.set_defaults(canvwidth=600, canvheight=400, turtle_canvas=canvas)
+
+` + code;
 
     __BRYTHON__.run_py(py);
 }
