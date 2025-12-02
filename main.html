@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Черепашка на Brython</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #turtle_area { margin-top: 20px; }
+    </style>
+</head>
+<body onload="brython()">
+
+<h2>Черепашка на Brython</h2>
+
+<textarea id="code" style="width:600px; height:200px;">
+import turtle
+
+t = turtle.Turtle()
+t.speed(3)
+
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+</textarea>
+
+<br><br>
+
+<button onclick="run_code()">Запустить</button>
+
+<div id="turtle_area"></div>
+
+<script type="text/javascript">
+function run_code() {
+    document.getElementById("turtle_area").innerHTML = `
+        <canvas id="mycanvas" width="600" height="400" style="border:1px solid black"></canvas>
+    `;
+    
+    let code = document.getElementById("code").value;
+
+    let py = `
+from browser import document
+import turtle
+
+canvas = document["mycanvas"]
+turtle.TurtleScreen(canvas)
+t = turtle.RawTurtle(canvas)
+` + "\n" + code;
+
+    __BRYTHON__.run_py(py);
+}
+</script>
+
+</body>
+</html>
