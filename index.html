@@ -1,118 +1,82 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Черепашка Skulpt — Demo</title>
+<meta charset="UTF-8">
+<title>Черепашка Skulpt</title>
 
-<!-- Skulpt (CDN) -->
+<!-- Skulpt -->
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
 
 <style>
   body { font-family: Arial, sans-serif; padding: 16px; }
-  textarea { width: 100%; max-width: 800px; height: 160px; font-family: monospace; }
-  #mycanvas { border: 1px solid #333; display:block; margin-top:12px; }
-  .controls { margin-top:8px; }
-  #output { white-space: pre-wrap; margin-top:8px; color:#b00; }
+  textarea { width: 100%; max-width: 700px; height: 150px; font-family: monospace; }
+  #mycanvas { border: 1px solid #000; margin-top: 15px; }
+  #output { margin-top: 10px; white-space: pre-wrap; color: #b00; }
 </style>
 </head>
 <body>
-  <h2>Черепашка на Skulpt (Python)</h2>
 
-  <textarea id="code">
+<h2>Skulpt Python Turtle</h2>
+
+<textarea id="code">
 import turtle
 
-turtle.forward(100)
-turtle.left(90)
-turtle.forward(100)
-turtle.left(90)
-turtle.forward(100)
-turtle.left(90)
-turtle.forward(100)
-  </textarea>
+turtle.speed(0)
+for i in range(4):
+    turtle.forward(100)
+    turtle.left(90)
+</textarea>
 
-  <div class="controls">
-    <button id="runBtn">Запустить</button>
-    <button id="clearBtn">Очистить</button>
-  </div>
+<br>
+<button onclick="runCode()">Запустить</button>
+<button onclick="clearCanvas()">Очистить холст</button>
 
-  <canvas id="mycanvas" width="800" height="480"></canvas>
+<canvas id="mycanvas" width="600" height="400"></canvas>
 
-  <div id="output" aria-live="polite"></div>
+<div id="output"></div>
 
 <script>
-(function(){
-  const codeEl = document.getElementById('code');
-  const outEl = document.getElementById('output');
-  const canvas = document.getElementById('mycanvas');
+function outf(text) {
+    document.getElementById("output").textContent += text;
+}
 
-  function outf(text) {
-    // вывод ошибок/print
-    outEl.textContent += text;
-  }
-
-  function builtinRead(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
-      throw "File not found: '" + x + "'";
-    }
+function builtinRead(x) {
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+        throw "File not found: '" + x + "'";
     return Sk.builtinFiles["files"][x];
-  }
+}
 
-  function resetOutput() {
-    outEl.textContent = "";
-  }
-
-  function clearCanvas() {
+function clearCanvas() {
+    const canvas = document.getElementById("mycanvas");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+    document.getElementById("output").textContent = "";
+}
 
-  function runCode() {
-    resetOutput();
+function runCode() {
     clearCanvas();
 
-    const prog = codeEl.value;
+    const prog = document.getElementById("code").value;
 
     Sk.configure({
-      output: outf,
-      read: builtinRead,
-      // enable python3 mode
-      python3: true
+        output: outf,
+        read: builtinRead,
+        python3: true
     });
 
-    // Создаём область черепашки для канваса:
-    // Перед importMainWithBody нужно инициализировать TurtleGraphics:
-    try {
-      // метод: Sk.TurtleGraphics('id_canvas')
-      Sk.TurtleGraphics(canvas.id);
-    } catch (e) {
-      // если уже инициализировано — игнорируем
-      console.warn(e && e.toString ? e.toString() : e);
-    }
+    // ВАЖНО! Правильный вызов без target=
+    Sk.TurtleGraphics("mycanvas");
 
-    // Запуск кода (асинхронно внутри Skulpt)
-    Sk.misceval.asyncToPromise(function() {
-      return Sk.importMainWithBody("<stdin>", false, prog, true);
-    }).then(function(mod) {
-      // выполнено успешно
-    }, function(err) {
-      // Показать ошибку пользователю
-      outf("\n" + err.toString());
-      console.error(err);
+    Sk.misceval.asyncToPromise(() => {
+        return Sk.importMainWithBody("<stdin>", false, prog, true);
+    }).catch(err => {
+        document.getElementById("output").textContent += "\n" + err.toString();
+        console.error(err);
     });
-  }
-
-  document.getElementById('runBtn').addEventListener('click', runCode);
-  document.getElementById('clearBtn').addEventListener('click', function(){
-    resetOutput();
-    clearCanvas();
-  });
-
-  // опционально: запустить при загрузке
-  // runCode();
-})();
+}
 </script>
+
 </body>
 </html>
