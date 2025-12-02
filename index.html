@@ -1,66 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-
-<!-- Новый Skulpt (исправно работает) -->
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
-
+  <meta charset="UTF-8">
+  <title>Skulpt Turtle Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
 </head>
 <body>
+  <h3>Try This</h3>
+  <textarea id="yourcode" cols="40" rows="10">import turtle
+t = turtle.Turtle()
+t.forward(100)
+print("Hello World")
+  </textarea><br>
+  <button onclick="runit()">Run</button>
+  <pre id="output"></pre>
+  <canvas id="mycanvas" width="600" height="400" style="border:1px solid black;"></canvas>
 
-<script>
-// вывод Python
-function outf(text) {
+  <script>
+  function outf(text) {
     document.getElementById("output").innerHTML += text;
-}
-
-// чтение стандартной библиотеки
-function builtinRead(x) {
-    if (!Sk.builtinFiles || !Sk.builtinFiles["files"][x])
-        throw "File not found: '" + x + "'";
+  }
+  function builtinRead(x) {
+    if (!Sk.builtinFiles || !Sk.builtinFiles["files"][x]) throw "File not found: '" + x + "'";
     return Sk.builtinFiles["files"][x];
-}
+  }
 
-// запуск скрипта
-function runit() {
-
+  function runit() {
     document.getElementById("output").innerHTML = "";
     const code = document.getElementById("yourcode").value;
 
+    // очистка холста
+    const canvas = document.getElementById("mycanvas");
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
     Sk.configure({
-        output: outf,
-        read: builtinRead,
-        python3: true,
-        turtlecanvas: "mycanvas"   // ВАЖНО!
+      output: outf,
+      read: builtinRead,
+      python3: true
     });
 
-    Sk.misceval.asyncToPromise(() => {
-        return Sk.importMainWithBody("<stdin>", false, code, true);
-    }).catch(err => {
-        outf("\n" + err.toString());
-    });
-}
-</script>
+    Sk.TurtleGraphics("mycanvas");
 
-<h3>Try This</h3>
-
-<textarea id="yourcode" cols="40" rows="10">import turtle
-
-t = turtle.Turtle()
-t.forward(100)
-
-print("Hello World")
-</textarea><br>
-
-<button onclick="runit()">Run</button>
-
-<pre id="output"></pre>
-
-<!-- Нужен CANVAS, НЕ div -->
-<canvas id="mycanvas" width="500" height="400" style="border:1px solid black;"></canvas>
-
+    Sk.misceval.asyncToPromise(() =>
+      Sk.importMainWithBody("<stdin>", false, code, true)
+    ).catch(err => outf("\n" + err.toString()));
+  }
+  </script>
 </body>
 </html>
