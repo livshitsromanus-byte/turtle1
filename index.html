@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
 <meta charset="UTF-8">
 
@@ -7,31 +7,21 @@
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
 
-<style>
-    #mycanvas {
-        border: 1px solid black;
-    }
-</style>
-
 </head>
 <body>
-
-<h3>OOO</h3>
 
 <textarea id="yourcode" cols="40" rows="10">
 import turtle
 
 t = turtle.Turtle()
 t.forward(150)
-t.left(90)
-t.forward(150)
 </textarea>
-<br>
+
 <button onclick="runit()">Run</button>
 
 <pre id="output"></pre>
 
-<canvas id="mycanvas" width="500" height="400"></canvas>
+<canvas id="mycanvas" width="500" height="400" style="border:1px solid black"></canvas>
 
 <script>
 function outf(text) {
@@ -45,12 +35,13 @@ function builtinRead(x) {
 }
 
 function runit() {
+
     document.getElementById("output").innerHTML = "";
 
     Sk.configure({
         output: outf,
         read: builtinRead,
-        python3: true,
+        __future__: Sk.python3,     // ✔ ВКЛЮЧАЕМ PYTHON3 БЕЗ СЛОМАННОГО python3:true
         turtlecanvas: "mycanvas"
     });
 
