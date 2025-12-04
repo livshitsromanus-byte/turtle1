@@ -1,52 +1,66 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Skulpt Turtle Test</title>
-  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
+<meta charset="UTF-8">
+
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-turtle.min.js"></script>
+
+<style>
+    #mycanvas {
+        border: 1px solid black;
+    }
+</style>
+
 </head>
 <body>
-  <h3>Try This</h3>
-  <textarea id="yourcode" cols="40" rows="10">import turtle
+
+<h3>Skulpt Turtle</h3>
+
+<textarea id="yourcode" cols="40" rows="10">
+import turtle
+
 t = turtle.Turtle()
-t.forward(100)
-print("Hello World")
-  </textarea><br>
-  <button onclick="runit()">Run</button>
-  <pre id="output"></pre>
-  <canvas id="mycanvas" width="600" height="400" style="border:1px solid black;"></canvas>
+t.forward(150)
+t.left(90)
+t.forward(150)
+</textarea>
+<br>
+<button onclick="runit()">Run</button>
 
-  <script>
-  function outf(text) {
+<pre id="output"></pre>
+
+<canvas id="mycanvas" width="500" height="400"></canvas>
+
+<script>
+function outf(text) {
     document.getElementById("output").innerHTML += text;
-  }
-  function builtinRead(x) {
-    if (!Sk.builtinFiles || !Sk.builtinFiles["files"][x]) throw "File not found: '" + x + "'";
+}
+
+function builtinRead(x) {
+    if (!Sk.builtinFiles || !Sk.builtinFiles["files"][x])
+        throw "File not found: '" + x + "'";
     return Sk.builtinFiles["files"][x];
-  }
+}
 
-  function runit() {
+function runit() {
     document.getElementById("output").innerHTML = "";
-    const code = document.getElementById("yourcode").value;
-
-    // очистка холста
-    const canvas = document.getElementById("mycanvas");
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
     Sk.configure({
-      output: outf,
-      read: builtinRead,
-      python3: true
+        output: outf,
+        read: builtinRead,
+        python3: true,
+        turtlecanvas: "mycanvas"
     });
 
-    Sk.TurtleGraphics("mycanvas");
+    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = "mycanvas";
 
     Sk.misceval.asyncToPromise(() =>
-      Sk.importMainWithBody("<stdin>", false, code, true)
-    ).catch(err => outf("\n" + err.toString()));
-  }
-  </script>
+        Sk.importMainWithBody("<stdin>", false, yourcode.value)
+    ).catch(err => outf(err.toString()));
+}
+</script>
+
 </body>
 </html>
